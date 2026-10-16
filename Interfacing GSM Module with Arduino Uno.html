@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Interfacing GSM Module with Arduino Uno | ECE Learning Lab</title>
+<style>
+:root{--ink:#17243b;--muted:#5b6880;--blue:#1459a6;--cyan:#e8f5ff;--paper:#f5f8fc;--line:#d8e2ef;--green:#147d52;--amber:#9a5b00;--red:#b42318}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.62 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+header{background:linear-gradient(125deg,#102b50,#1768a8);color:white;padding:42px 22px 34px}
+.hero{max-width:1120px;margin:auto}.eyebrow{text-transform:uppercase;letter-spacing:.13em;font-size:.78rem;font-weight:800;color:#bce4ff}
+h1{font-size:clamp(2rem,5vw,3.25rem);line-height:1.12;margin:.45rem 0 1rem}header p{max-width:800px;color:#e0efff;font-size:1.08rem}
+.pills{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}.pill{border:1px solid #ffffff55;border-radius:99px;padding:5px 11px;font-size:.84rem}
+nav{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid var(--line);box-shadow:0 2px 10px #17345a0b}
+.navinner{max-width:1120px;margin:auto;padding:10px 16px;display:flex;gap:8px;overflow-x:auto;white-space:nowrap}nav a{color:var(--blue);text-decoration:none;font-size:.88rem;font-weight:700;padding:6px 9px;border-radius:7px}nav a:hover{background:var(--cyan)}
+main{max-width:1120px;margin:26px auto;padding:0 18px 60px}.card{background:white;border:1px solid var(--line);border-radius:15px;padding:24px;margin:18px 0;box-shadow:0 5px 18px #19375b08}
+h2{font-size:1.55rem;line-height:1.25;margin:0 0 14px}h3{font-size:1.12rem;margin:18px 0 7px}p{margin:8px 0 12px}.muted{color:var(--muted)}.callout{border-left:4px solid var(--blue);background:#eef7ff;padding:13px 16px;border-radius:7px;margin:14px 0}.warn{border-left-color:#d88a12;background:#fff7e8}.good{border-left-color:var(--green);background:#eaf8f1}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.mini{background:#f7faff;border:1px solid var(--line);padding:14px;border-radius:11px}
+table{width:100%;border-collapse:collapse;margin:12px 0;font-size:.94rem}th,td{border:1px solid var(--line);padding:10px 11px;text-align:left;vertical-align:top}th{background:#edf4fb}
+code,pre{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}code{background:#edf2f8;padding:2px 5px;border-radius:4px}pre{overflow:auto;background:#101c2d;color:#e6f2ff;padding:18px;border-radius:10px;font-size:.88rem;line-height:1.55;white-space:pre}
+button{border:0;border-radius:8px;padding:10px 15px;background:var(--blue);color:#fff;font-weight:750;cursor:pointer}button.secondary{background:#e8eef6;color:var(--ink)}button:hover{filter:brightness(.94)}
+details{border:1px solid var(--line);border-radius:9px;padding:12px 14px;margin:9px 0;background:#fff}summary{font-weight:750;cursor:pointer}label.choice{display:block;border:1px solid var(--line);padding:10px 12px;border-radius:8px;margin:7px 0;cursor:pointer}label.choice:hover{background:#f4f9ff}.feedback{font-size:.92rem;margin-top:8px}.correct{color:var(--green);font-weight:800}.incorrect{color:var(--red);font-weight:800}
+svg{max-width:100%;height:auto}.diagram{overflow-x:auto;background:#fbfdff;border:1px solid var(--line);border-radius:10px;padding:12px}
+footer{background:#102b50;color:#d8e8fa;padding:25px;text-align:center}
+@media(max-width:720px){.grid,.grid3{grid-template-columns:1fr}.card{padding:17px}header{padding-top:30px}table{font-size:.86rem}th,td{padding:8px}}
+@media print{body{background:#fff;font-size:11pt}nav,button{display:none!important}.card{box-shadow:none;break-inside:avoid;margin:10px 0;padding:14px}header{background:#fff;color:#111;padding:15px 0}header p,.eyebrow{color:#333}main{max-width:none;margin:0;padding:0}.pills{display:none}pre{white-space:pre-wrap;color:#111;background:#f3f3f3}.hero{max-width:none}}
+</style>
+</head>
+<body>
+<header><div class="hero">
+<div class="eyebrow">Electronics & Communication Engineering • Embedded Systems</div>
+<h1>Interfacing GSM Module with Arduino Uno</h1>
+<p>A practical learning guide to connect a GSM modem to an Arduino, communicate using AT commands, and send an SMS alert. Includes wiring, sample code, troubleshooting, revision notes, interview questions, and interactive quizzes.</p>
+<div class="pills"><span class="pill">B.E./B.Tech ECE</span><span class="pill">Arduino Uno</span><span class="pill">GSM / SMS</span><span class="pill">Offline learning page</span></div>
+</div></header>
+<nav><div class="navinner">
+<a href="#overview">Overview</a><a href="#hardware">Hardware & Wiring</a><a href="#working">Working</a><a href="#commands">AT Commands</a><a href="#code">Arduino Code</a><a href="#testing">Testing</a><a href="#applications">Applications</a><a href="#interview">Interview Q&A</a><a href="#quiz">Quiz</a><a href="#revision">Revision</a>
+</div></nav>
+<main>
+<section id="overview" class="card">
+<h2>1. Introduction and learning objectives</h2>
+<p>A <b>GSM (Global System for Mobile Communications) module</b> is a cellular communication modem that lets a microcontroller exchange information over a mobile network. With an Arduino Uno, it can send SMS messages, make calls, or exchange data, depending on the modem and network support.</p>
+<div class="grid">
+<div class="mini"><h3>How it works</h3><p>The Arduino sends serial commands called <b>AT commands</b> to the modem. The modem uses a SIM card and cellular network to perform the requested action.</p></div>
+<div class="mini"><h3>Learning objectives</h3><ul><li>Identify the hardware and serial interface.</li><li>Connect TX/RX and power safely.</li><li>Use basic AT commands.</li><li>Upload code to send an SMS.</li><li>Test and debug the link.</li></ul></div>
+</div>
+<h3>Prerequisites</h3>
+<p>Basic Arduino programming, digital voltage levels, UART serial communication, and familiarity with a SIM card and cellular coverage.</p>
+<div class="callout warn"><b>Network compatibility:</b> Many classic SIM800/SIM900 modules use 2G GSM. In some regions, 2G service has been retired or is unavailable. Confirm local network availability and your module's supported bands before buying or testing. A 4G/LTE module requires its own compatible wiring, power supply, and commands.</div>
+</section>
+
+<section id="hardware" class="card">
+<h2>2. Hardware and circuit connections</h2>
+<p>Example below assumes a <b>SIM800/SIM900-style UART GSM breakout</b> and Arduino Uno. Pin labels and power requirements differ between breakout boards, so follow the exact module datasheet.</p>
+<div class="diagram">
+<svg viewBox="0 0 850 350" role="img" aria-label="Wiring diagram showing Arduino Uno connected to a GSM module by crossed serial wires and common ground">
+<rect x="25" y="55" width="285" height="230" rx="16" fill="#e7f2ff" stroke="#1459a6" stroke-width="2"/>
+<text x="167" y="86" text-anchor="middle" font-size="21" font-weight="bold" fill="#143d70">Arduino Uno</text>
+<rect x="60" y="112" width="215" height="48" rx="7" fill="#fff" stroke="#8ca9c9"/><text x="167" y="142" text-anchor="middle" font-size="17" fill="#17243b">D10 (Software RX)</text>
+<rect x="60" y="177" width="215" height="48" rx="7" fill="#fff" stroke="#8ca9c9"/><text x="167" y="207" text-anchor="middle" font-size="17" fill="#17243b">D11 (Software TX)</text>
+<text x="167" y="260" text-anchor="middle" font-size="15" fill="#17243b">GND</text>
+<rect x="540" y="55" width="285" height="230" rx="16" fill="#e8f8f0" stroke="#147d52" stroke-width="2"/>
+<text x="682" y="86" text-anchor="middle" font-size="21" font-weight="bold" fill="#116442">GSM Module</text>
+<rect x="575" y="112" width="215" height="48" rx="7" fill="#fff" stroke="#8dbba6"/><text x="682" y="142" text-anchor="middle" font-size="17" fill="#17243b">TXD</text>
+<rect x="575" y="177" width="215" height="48" rx="7" fill="#fff" stroke="#8dbba6"/><text x="682" y="207" text-anchor="middle" font-size="17" fill="#17243b">RXD</text>
+<text x="682" y="260" text-anchor="middle" font-size="15" fill="#17243b">GND</text>
+<path d="M275 136 H430 V201 H575" fill="none" stroke="#d97706" stroke-width="3"/><text x="425" y="125" text-anchor="middle" font-size="14" fill="#9a5b00">D10 receives from TXD</text>
+<path d="M275 201 H470 V136 H575" fill="none" stroke="#2563eb" stroke-width="3"/><text x="474" y="225" text-anchor="middle" font-size="14" fill="#1459a6">D11 sends to RXD</text>
+<path d="M167 263 V315 H682 V263" fill="none" stroke="#64748b" stroke-width="3"/><text x="425" y="339" text-anchor="middle" font-size="15" fill="#475569">Common ground (GND) when using a separate supply</text>
+</svg>
+</div>
+<table><thead><tr><th>Arduino Uno</th><th>GSM module</th><th>Purpose</th></tr></thead><tbody>
+<tr><td>D10 (SoftwareSerial RX)</td><td>TXD</td><td>Arduino receives modem responses</td></tr>
+<tr><td>D11 (SoftwareSerial TX)</td><td>RXD</td><td>Arduino sends AT commands</td></tr>
+<tr><td>GND</td><td>GND</td><td>Common voltage reference</td></tr>
+<tr><td>External supply, as specified by board</td><td>Power input</td><td>Provides adequate current and correct voltage</td></tr>
+<tr><td>SIM card and antenna</td><td>SIM slot / antenna connector</td><td>Network registration and radio connection</td></tr>
+</tbody></table>
+<div class="callout warn"><b>Important power and logic-level safety:</b> Do not assume the GSM board can be powered from the Uno's 5 V pin. Cellular modems draw large, brief current peaks; inadequate power causes resets and failed SMS sending. Use the board's recommended regulated supply. Some bare modules use low-voltage UART logic and are <b>not 5 V tolerant</b>; use a suitable level shifter or interface board. Check the exact breakout documentation before wiring.</div>
+<h3>Component/function table</h3>
+<table><tr><th>Part</th><th>Function</th></tr><tr><td>Arduino Uno</td><td>Runs the program and issues serial commands.</td></tr><tr><td>GSM modem</td><td>Connects to the cellular network and handles SMS/calls.</td></tr><tr><td>SIM card</td><td>Provides subscriber identity and network access.</td></tr><tr><td>Antenna</td><td>Supports cellular radio transmission and reception.</td></tr><tr><td>External power supply</td><td>Supplies the modem with the voltage/current required by its board.</td></tr></table>
+</section>
+
+<section id="working" class="card">
+<h2>3. Working principle: step by step</h2>
+<ol><li>Insert an active SIM card; disable its PIN lock if the program does not handle PIN entry.</li><li>Connect the antenna and provide the recommended supply.</li><li>Arduino opens a UART serial link to the GSM modem.</li><li>Arduino sends <code>AT</code>; modem should reply <code>OK</code>.</li><li>Arduino configures SMS text mode using <code>AT+CMGF=1</code>.</li><li>Arduino sends <code>AT+CMGS="+countrycode-number"</code>.</li><li>After the modem prompts with <code>&gt;</code>, Arduino sends the message and ASCII Ctrl+Z (decimal 26).</li><li>The modem submits the SMS to the network and returns a result such as <code>+CMGS: ...</code> followed by <code>OK</code> if successful.</li></ol>
+<div class="grid3"><div class="mini"><b>Arduino → Modem</b><p>AT commands over UART TX.</p></div><div class="mini"><b>Modem → Arduino</b><p>Replies and status messages over UART RX.</p></div><div class="mini"><b>Modem ↔ Network</b><p>Radio link sends the SMS through the mobile network.</p></div></div>
+<h3>UART cross-connection rule</h3><p><b>TX connects to RX, and RX connects to TX.</b> UART is asynchronous serial communication; both devices must use compatible baud rates and logic levels.</p>
+</section>
+
+<section id="commands" class="card">
+<h2>4. Useful AT commands</h2>
+<table><tr><th>Command</th><th>Purpose</th><th>Typical response / note</th></tr>
+<tr><td><code>AT</code></td><td>Check serial communication</td><td><code>OK</code></td></tr>
+<tr><td><code>ATE0</code></td><td>Disable command echo</td><td><code>OK</code> on many modems</td></tr>
+<tr><td><code>AT+CPIN?</code></td><td>Check SIM PIN status</td><td>Often <code>+CPIN: READY</code> if ready</td></tr>
+<tr><td><code>AT+CSQ</code></td><td>Query signal quality</td><td>Returns RSSI and BER fields; <code>99</code> RSSI means unknown/not detectable</td></tr>
+<tr><td><code>AT+CREG?</code></td><td>Check network registration (2G/3G-style)</td><td>Registration status varies by modem; <code>1</code> or <code>5</code> commonly means registered</td></tr>
+<tr><td><code>AT+CMGF=1</code></td><td>Set SMS text mode</td><td><code>OK</code> if supported</td></tr>
+<tr><td><code>AT+CMGS="number"</code></td><td>Start SMS submission</td><td>Wait for <code>&gt;</code>, type message, then Ctrl+Z</td></tr>
+</table>
+<div class="callout"><b>Remember:</b> AT commands are modem firmware commands, not Arduino language keywords. Exact commands and responses vary with modem model and firmware.</div>
+</section>
+
+<section id="code" class="card">
+<h2>5. Arduino program: send an SMS</h2>
+<p>This example uses <code>SoftwareSerial</code> on pins 10 and 11. Replace the phone number with the recipient's number in international format. Confirm that your modem supports the selected serial baud rate.</p>
+<pre><code>#include &lt;SoftwareSerial.h&gt;
+
+// Arduino RX, TX. Cross-connect to modem TXD, RXD.
+SoftwareSerial gsm(10, 11);
+
+const char phoneNumber[] = "+12345678900"; // Replace with recipient number
+
+void setup() {
+  Serial.begin(9600);   // USB serial monitor
+  gsm.begin(9600);      // Common example baud; verify your modem
+  delay(1500);
+
+  Serial.println("Starting GSM SMS test...");
+  gsm.println("AT");
+  delay(1000);
+  showModemReply();
+
+  gsm.println("AT+CMGF=1"); // SMS text mode
+  delay(1000);
+  showModemReply();
+
+  gsm.print("AT+CMGS=\\"");
+  gsm.print(phoneNumber);
+  gsm.println("\\"");
+  delay(1000); // Wait for the '>' prompt on a simple demo
+
+  gsm.print("Hello! SMS sent using Arduino Uno and GSM.");
+  gsm.write(26); // Ctrl+Z submits the SMS
+  delay(5000);
+  showModemReply();
+}
+
+void loop() {
+  // Forward any new modem replies to the Serial Monitor.
+  while (gsm.available()) {
+    Serial.write(gsm.read());
+  }
+}
+
+void showModemReply() {
+  unsigned long start = millis();
+  while (millis() - start &lt; 1500) {
+    while (gsm.available()) {
+      Serial.write(gsm.read());
+    }
+  }
+}</code></pre>
+<div class="callout warn"><b>Educational example, not production-grade code:</b> Fixed delays are simple for a lab demonstration but do not robustly verify the <code>&gt;</code> prompt, network registration, or SMS submission. For reliable projects, parse modem responses with timeouts and error handling. Some modules use a different default baud rate or need explicit power-on control.</div>
+<h3>Code explained</h3><ul><li><code>SoftwareSerial gsm(10, 11)</code>: creates a serial connection using Arduino pins 10 (RX) and 11 (TX).</li><li><code>gsm.begin(9600)</code>: sets the serial speed; it must match the modem.</li><li><code>AT+CMGF=1</code>: chooses text mode for SMS.</li><li><code>AT+CMGS</code>: starts the SMS sending procedure.</li><li><code>gsm.write(26)</code>: sends Ctrl+Z, telling the modem the message is complete.</li></ul>
+</section>
+
+<section id="testing" class="card">
+<h2>6. Testing procedure and troubleshooting</h2>
+<ol><li>Check the module supply voltage and current rating against its datasheet.</li><li>Check SIM activation, PIN status, antenna, and cellular coverage.</li><li>Upload the sketch and open Serial Monitor at 9600 baud.</li><li>Look for modem responses to <code>AT</code> and <code>AT+CMGF=1</code>.</li><li>Verify registration with the modem's supported registration command.</li><li>Confirm the recipient number format and check for an SMS submission response.</li></ol>
+<table><tr><th>Symptom</th><th>Likely causes</th><th>What to check</th></tr>
+<tr><td>No response to <code>AT</code></td><td>Wrong baud rate, TX/RX reversed incorrectly, no power, wrong logic levels</td><td>Try the documented baud rate; cross TX/RX; inspect power and ground.</td></tr>
+<tr><td>Module repeatedly restarts</td><td>Supply cannot handle current peaks</td><td>Use a suitable regulated supply and short, solid power leads.</td></tr>
+<tr><td>SIM not ready</td><td>SIM not seated, PIN lock, damaged/inactive SIM</td><td>Check <code>AT+CPIN?</code> and SIM status.</td></tr>
+<tr><td>Not registered</td><td>No coverage, unsupported network/bands, retired 2G service</td><td>Check network compatibility, antenna, signal, and registration status.</td></tr>
+<tr><td>SMS fails</td><td>Wrong number, no network registration, text mode not set, prompt not handled</td><td>Check <code>AT+CSQ</code>, <code>AT+CREG?</code>, <code>AT+CMGF=1</code>, and modem response.</td></tr>
+<tr><td>Garbage characters</td><td>Baud mismatch or serial timing issues</td><td>Match baud rates; test with a hardware UART or a suitable serial adapter.</td></tr></table>
+</section>
+
+<section id="applications" class="card">
+<h2>7. Applications and engineering relevance</h2>
+<div class="grid">
+<div><h3>Applications</h3><ul><li>SMS alerts for home/security alarms.</li><li>Remote monitoring of water tanks, temperature, or equipment status.</li><li>Vehicle tracking and alert systems (with suitable GPS hardware).</li><li>Industrial fault notifications and remote telemetry.</li><li>Smart agriculture alerts for pumps or sensors.</li></ul></div>
+<div><h3>Design considerations</h3><ul><li>Network availability and supported radio bands.</li><li>Peak current, supply noise, and decoupling.</li><li>UART voltage compatibility and baud rate.</li><li>Message delivery delays and error handling.</li><li>SIM plan, privacy, security, and recurring costs.</li></ul></div>
+</div>
+<h3>Advantages and limitations</h3><table><tr><th>Advantages</th><th>Limitations</th></tr><tr><td>Wide-area communication where cellular service exists.</td><td>Depends on network coverage and operator support.</td></tr><tr><td>Simple command-based interface.</td><td>Power peaks can be demanding.</td></tr><tr><td>SMS can reach a phone without a custom app.</td><td>SMS delivery is not guaranteed to be immediate.</td></tr><tr><td>Useful for low-data-rate remote alerts.</td><td>Older 2G-only modules may no longer work in some regions.</td></tr></table>
+<p><b>Relevant roles:</b> Embedded firmware engineer, IoT hardware engineer, electronics validation/test engineer, and field application engineer.</p>
+</section>
+
+<section id="interview" class="card">
+<h2>8. Core electronics interview questions</h2>
+<details><summary>1. What is a GSM module?</summary><p>A cellular modem that lets a controller communicate over a mobile network using interfaces such as UART and commands such as AT commands.</p></details>
+<details><summary>2. Why are TX and RX crossed?</summary><p>One device's transmit output must feed the other device's receive input, so Arduino TX goes to modem RX and modem TX goes to Arduino RX.</p></details>
+<details><summary>3. What is an AT command?</summary><p>A text command used to configure and control a modem. <code>AT</code> is commonly used as a basic communication test.</p></details>
+<details><summary>4. Why might a GSM module need a separate supply?</summary><p>Its transmit bursts can draw high peak current. A weak supply can cause voltage drops, resets, and failed network operations.</p></details>
+<details><summary>5. What does <code>AT+CMGF=1</code> do?</summary><p>It selects SMS text mode on modems that support this command. PDU mode is another SMS representation.</p></details>
+<details><summary>6. Why is Ctrl+Z sent after the SMS body?</summary><p>ASCII decimal 26 signals the end of the message body and requests submission.</p></details>
+<details><summary>7. How do you check signal quality?</summary><p>Use <code>AT+CSQ</code>. Interpret its result according to the modem documentation; RSSI 99 generally indicates unknown or undetectable.</p></details>
+<details><summary>8. Why is a common ground important?</summary><p>It provides a shared reference for UART signal voltages when the devices use separate supplies.</p></details>
+<details><summary>9. The module responds to AT but cannot send an SMS. What do you inspect?</summary><p>SIM readiness, network registration, signal, SMS mode, phone-number format, message prompt handling, and the final modem error response.</p></details>
+<details><summary>10. Can every GSM module connect directly to Arduino 5 V logic?</summary><p>No. UART logic thresholds differ. Check the board documentation and use level shifting if the modem RX input is not 5 V tolerant.</p></details>
+<details><summary>11. What is the difference between UART and GSM?</summary><p>UART is a local serial communication interface between devices; GSM is a cellular radio system/network technology. UART can carry AT commands to the modem.</p></details>
+<details><summary>12. How would you make the SMS code more robust?</summary><p>Wait for and parse expected responses, use timeouts, verify registration, retry carefully, log error codes, and avoid assuming a fixed delay means success.</p></details>
+</section>
+
+<section id="quiz" class="card">
+<h2>9. Interactive topic quiz (10 questions)</h2>
+<p class="muted">Choose one answer for each question, then press Check Answers. Each question is worth one point.</p>
+<form id="quizForm"></form>
+<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px"><button type="button" id="checkQuiz">Check Answers</button><button type="button" class="secondary" id="resetQuiz">Reset Quiz</button></div>
+<div id="quizResult" aria-live="polite" class="feedback"></div>
+</section>
+
+<section id="gate" class="card">
+<h2>10. GATE-style practice (original questions)</h2>
+<p class="muted">These are original practice questions, not claimed to be official previous-year questions.</p>
+<details><summary>Q1 • Easy — Which command checks whether a modem responds?</summary><p><b>Answer: AT.</b> A responding modem commonly returns OK.</p></details>
+<details><summary>Q2 • Easy — For Arduino SoftwareSerial(RX=10, TX=11), where should pin 10 connect?</summary><p><b>Answer: Modem TXD.</b> Arduino's receive pin must receive the modem's transmit data.</p></details>
+<details><summary>Q3 • Moderate — Which command selects SMS text mode on a compatible modem?</summary><p><b>Answer: AT+CMGF=1.</b> The value 1 selects text mode; 0 generally selects PDU mode.</p></details>
+<details><summary>Q4 • Moderate — What character commonly submits an SMS after the body?</summary><p><b>Answer: Ctrl+Z (ASCII 26).</b> It marks the end of the message body for submission.</p></details>
+<details><summary>Q5 • Moderate — A modem resets during transmission although UART wiring is correct. What is a prime suspect?</summary><p><b>Answer: Insufficient peak-current capability or supply voltage drop.</b></p></details>
+<details><summary>Q6 • Difficult — Why must a designer check module logic voltage?</summary><p><b>Answer:</b> The modem UART pins may not tolerate Arduino Uno's 5 V output; exceeding the input rating can damage the module.</p></details>
+<details><summary>Q7 • Moderate — Does <code>AT+CSQ</code> itself register the modem on the network?</summary><p><b>Answer: No.</b> It queries signal quality; registration is a separate network state.</p></details>
+<details><summary>Q8 • Difficult — Why is waiting a fixed 1 second after every command not robust?</summary><p><b>Answer:</b> Response times vary. Parse expected prompts and results with timeouts rather than assuming the operation completed.</p></details>
+<details><summary>Q9 • Moderate — What is required if the modem uses a retired cellular technology in your area?</summary><p><b>Answer:</b> Use a compatible modem/network technology and supported bands; code changes alone cannot restore unavailable network service.</p></details>
+<details><summary>Q10 • Difficult — Why can an SMS command return an error even when AT communication works?</summary><p><b>Answer:</b> The serial link may work while SIM readiness, registration, signal, SMS configuration, recipient number, or operator service is not valid.</p></details>
+</section>
+
+<section id="revision" class="card">
+<h2>11. Quick revision sheet</h2>
+<div class="grid">
+<div><h3>Must remember</h3><ul><li>UART wires cross: Arduino TX → modem RX; modem TX → Arduino RX.</li><li>Use common GND with separate supplies.</li><li>Check modem power and logic voltage in its datasheet.</li><li><code>AT</code> → communication check.</li><li><code>AT+CMGF=1</code> → SMS text mode.</li><li><code>AT+CMGS="number"</code> → start SMS.</li><li>Ctrl+Z / ASCII 26 → submit message.</li></ul></div>
+<div><h3>Frequent mistakes</h3><ul><li>Powering a modem from an unsuitable Arduino pin.</li><li>Connecting TX to TX or RX to RX.</li><li>Forgetting the antenna or SIM/network compatibility.</li><li>Using the wrong baud rate or number format.</li><li>Assuming <code>OK</code> for AT means SMS delivery is guaranteed.</li><li>Ignoring that 2G coverage varies by region.</li></ul></div>
+</div>
+<h3>Mini formula / facts sheet</h3><table><tr><th>Item</th><th>Fact</th></tr><tr><td>UART</td><td>Asynchronous serial interface; baud rates must match.</td></tr><tr><td>SMS text mode</td><td><code>AT+CMGF=1</code> on compatible modems.</td></tr><tr><td>SMS terminator</td><td>Ctrl+Z = decimal 26 = hexadecimal 0x1A.</td></tr><tr><td>Signal query</td><td><code>AT+CSQ</code>; consult the modem manual for interpretation.</td></tr><tr><td>Power</td><td>Use the board's specified voltage and adequate peak current.</td></tr></table>
+<div class="callout good"><b>One-line memory aid:</b> “Power safely → check AT → check SIM/network → set text mode → start CMGS → send message → Ctrl+Z → inspect response.”</div>
+<button type="button" onclick="window.print()">Print / Save as PDF</button>
+</section>
+</main>
+<footer><p><b>ECE Learning Lab</b> • Standalone educational resource</p><p>Always verify wiring, power, voltage levels, supported bands, and AT commands against your exact GSM board's datasheet.</p></footer>
+<script>
+const questions = [
+{q:"What is the main role of a GSM module with Arduino?",a:["To increase Arduino clock speed","To provide cellular communication","To convert analog input to digital","To program the Arduino bootloader"],c:1,e:"The modem provides a cellular-network connection for SMS, calls, or data, depending on its capabilities."},
+{q:"Arduino SoftwareSerial is declared as SoftwareSerial gsm(10, 11). Pin 10 is:",a:["Transmit pin","Receive pin","Power pin","Ground pin"],c:1,e:"The constructor order is RX first, TX second. Pin 10 receives data from the modem TXD."},
+{q:"Which connection is correct for serial data from Arduino to modem?",a:["Arduino TX to modem TX","Arduino RX to modem RX","Arduino TX to modem RX","Arduino GND to modem RX"],c:2,e:"Transmit from one device connects to receive on the other."},
+{q:"Which AT command commonly checks basic modem communication?",a:["AT","AT+CMGS","AT+CMGF=1","AT+CSQ=0"],c:0,e:"Send AT and look for a response such as OK."},
+{q:"What does AT+CMGF=1 do on a compatible modem?",a:["Turns off the antenna","Selects SMS text mode","Reads GPS coordinates","Sets Arduino pin 1 as output"],c:1,e:"CMGF selects the SMS message format; 1 is text mode on compatible modems."},
+{q:"What signals the end of the SMS text for submission in this example?",a:["Tab","Escape","Ctrl+Z (ASCII 26)","A null byte only"],c:2,e:"Ctrl+Z, decimal 26, is the usual SMS submission terminator for this AT command flow."},
+{q:"Why might a GSM module reset when it tries to transmit?",a:["The sketch has comments","Power supply cannot handle current peaks","The SIM card stores too much text","Arduino digital pins are numbered"],c:1,e:"Cellular transmit bursts can cause supply droop if the supply or wiring is inadequate."},
+{q:"What is the purpose of a common ground?",a:["To increase baud rate","To provide a shared signal reference","To replace the SIM card","To amplify the antenna"],c:1,e:"UART voltage levels are interpreted relative to a common reference when separate supplies are used."},
+{q:"What should you check if AT works but SMS fails?",a:["Only the Arduino LED color","SIM readiness, registration, signal, and SMS setup","The computer wallpaper","The USB cable length only"],c:1,e:"Basic UART communication does not guarantee SIM/network readiness or successful SMS submission."},
+{q:"Can a 2G-only modem be assumed to work anywhere today?",a:["Yes, all networks support 2G","Yes, if the code compiles","No, network availability and bands must be checked","No, because UART cannot carry text"],c:2,e:"2G service has been retired or limited in some regions; verify operator support and module bands."}
+];
+const form=document.getElementById("quizForm");
+questions.forEach((q,i)=>{
+ const field=document.createElement("fieldset");field.style.cssText="border:1px solid var(--line);border-radius:10px;padding:14px;margin:14px 0";
+ const legend=document.createElement("legend");legend.style.fontWeight="800";legend.textContent=`${i+1}. ${q.q}`;field.appendChild(legend);
+ q.a.forEach((a,j)=>{const lab=document.createElement("label");lab.className="choice";const inp=document.createElement("input");inp.type="radio";inp.name="q"+i;inp.value=j;inp.style.marginRight="9px";lab.appendChild(inp);lab.appendChild(document.createTextNode(a));field.appendChild(lab)});
+ const fb=document.createElement("div");fb.className="feedback";fb.id="fb"+i;field.appendChild(fb);form.appendChild(field);
+});
+document.getElementById("checkQuiz").addEventListener("click",()=>{
+ let score=0,answered=0;
+ questions.forEach((q,i)=>{const selected=form.querySelector(`input[name="q${i}"]:checked`);const fb=document.getElementById("fb"+i);
+ if(selected){answered++;if(Number(selected.value)===q.c){score++;fb.innerHTML='<span class="correct">Correct.</span> '+q.e}else{fb.innerHTML='<span class="incorrect">Incorrect.</span> Correct answer: '+q.a[q.c]+'. '+q.e}}
+ else{fb.innerHTML='<span class="incorrect">Unanswered.</span> Correct answer: '+q.a[q.c]+'. '+q.e}
+ });
+ const pct=Math.round(score/questions.length*100);document.getElementById("quizResult").innerHTML=`<h3>Score: ${score}/10 (${pct}%)</h3><p>${answered} of 10 questions answered. Review the explanations below each question, then reset to try again.</p>`;
+});
+document.getElementById("resetQuiz").addEventListener("click",()=>{form.reset();questions.forEach((q,i)=>document.getElementById("fb"+i).textContent="");document.getElementById("quizResult").textContent="";});
+</script>
+</body>
+</html>
